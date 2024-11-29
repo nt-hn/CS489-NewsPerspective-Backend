@@ -17,6 +17,8 @@ Analyzes the given article text and returns insights like sentiment, bias, emoti
 ```json
 {
     "analysis": { ... },
+    "keywords": { ... },
+    "political_analysis": { ... },
     "related_articles": [ ... ],
     "status": "success"
 }
