@@ -42,7 +42,6 @@ def analyze_article():
         
         related_articles = analyzer.find_related_articles(analysis['keywords'])
         
-        # Prepare response
         response = {
             'status': 'success',
             'analysis': analysis['bias_analysis'],

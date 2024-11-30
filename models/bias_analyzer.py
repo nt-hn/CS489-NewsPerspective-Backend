@@ -1,5 +1,4 @@
 import spacy
-import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 from nltk.tokenize import sent_tokenize
 from collections import defaultdict
@@ -9,7 +8,6 @@ class PoliticalAnalyzer:
     def __init__(self):
         self.nlp = spacy.load('en_core_web_sm')
         
-        # Common partisan terms and phrases
         self.partisan_indicators = {
             'left': {
                 'terms': {
@@ -35,7 +33,6 @@ class PoliticalAnalyzer:
             }
         }
         
-        # Framing patterns for issues
         self.framing_patterns = {
             'immigration': {
                 'left': ['undocumented immigrants', 'asylum seekers', 'refugees'],
@@ -64,20 +61,17 @@ class PoliticalAnalyzer:
             }
         }
         
-        # Check individual terms
         for direction in ['left', 'right']:
             for term in self.partisan_indicators[direction]['terms']:
                 if term in text_lower:
                     scores[direction] += 1
                     scores['indicators'][direction].append(term)
             
-            # Check phrases
             for phrase in self.partisan_indicators[direction]['phrases']:
                 if phrase in text_lower:
-                    scores[direction] += 1.5  # Phrases weighted more heavily
+                    scores[direction] += 1.5  
                     scores['indicators'][direction].append(phrase)
         
-        # Check framing patterns
         for issue, frames in self.framing_patterns.items():
             for direction, patterns in frames.items():
                 for pattern in patterns:
@@ -85,7 +79,6 @@ class PoliticalAnalyzer:
                         scores[direction] += 1
                         scores['indicators'][direction].append(f"{issue}: {pattern}")
         
-        # Calculate relative leaning
         total_score = scores['left'] + scores['right']
         if total_score > 0:
             left_percentage = (scores['left'] / total_score) * 100
@@ -93,7 +86,6 @@ class PoliticalAnalyzer:
         else:
             left_percentage = right_percentage = 0
         
-        # Determine overall leaning and strength
         if left_percentage > right_percentage:
             if left_percentage > 70:
                 leaning = "Strong Left"
@@ -119,11 +111,9 @@ class PoliticalAnalyzer:
 
 class BiasAnalyzer:
     def __init__(self):
-        # Load spaCy model
         self.nlp = spacy.load('en_core_web_sm')
         self.sid = SentimentIntensityAnalyzer()
         
-        # Enhanced bias detection patterns
         self.opinion_words = {
             'believe', 'think', 'feel', 'suggest', 'seem', 'appear', 'suspect',
             'assume', 'speculate', 'guess', 'imagine', 'presume', 'suppose'
@@ -156,35 +146,27 @@ class BiasAnalyzer:
             sent_text = sent.text.strip()
             sent_lower = sent_text.lower()
             
-            # Check for opinion statements
             if any(word in sent_lower for word in self.opinion_words):
                 indicators['opinion_statements'].append(sent_text)
             
-            # Check for extreme language
             if any(word in sent_lower for word in self.extreme_words):
                 indicators['extreme_language'].append(sent_text)
             
-            # Check for hedge words/uncertainty
             if any(word in sent_lower for word in self.hedge_words):
                 indicators['hedging'].append(sent_text)
             
-            # Check for emotional language
             if any(word in sent_lower for word in self.emotional_words):
                 indicators['emotional_language'].append(sent_text)
             
-            # Check for loaded words
             if any(word in sent_lower for word in self.loaded_words):
                 indicators['loaded_words'].append(sent_text)
             
-            # Check for unsubstantiated claims
             if any(word in sent_lower for word in ['studies show', 'research shows', 'experts say']):
                 indicators['unsubstantiated_claims'].append(sent_text)
             
-            # Check for generalizations
             if any(word in sent_lower for word in ['all', 'every', 'none', 'always', 'never']):
                 indicators['generalizations'].append(sent_text)
         
-        # Only include non-empty categories
         return {k: v for k, v in indicators.items() if v}
 
     def analyze(self, text):
@@ -198,7 +180,6 @@ class BiasAnalyzer:
             'overall_bias_score': 0.0  # Will be calculated
         }
         
-        # Calculate overall bias score
         analysis['overall_bias_score'] = self._calculate_overall_bias(analysis)
         
         return analysis
@@ -211,7 +192,6 @@ class BiasAnalyzer:
             scores = self.sid.polarity_scores(sentence)
             sentiments.append(scores)
             
-        # Aggregate sentiment scores
         avg_sentiment = {
             'compound': np.mean([s['compound'] for s in sentiments]),
             'pos': np.mean([s['pos'] for s in sentiments]),
@@ -238,7 +218,7 @@ class BiasAnalyzer:
         
         for sent in doc.sents:
             scores = self.sid.polarity_scores(sent.text)
-            if abs(scores['compound']) > 0.5:  # High emotional intensity
+            if abs(scores['compound']) > 0.5:  
                 emotional_phrases.append({
                     'text': sent.text,
                     'intensity': scores['compound']
@@ -247,7 +227,6 @@ class BiasAnalyzer:
         return emotional_phrases
     
     def _calculate_overall_bias(self, analysis):
-        # Weighted combination of different factors
         sentiment_weight = 0.3
         subjectivity_weight = 0.3
         emotional_weight = 0.2
@@ -255,7 +234,7 @@ class BiasAnalyzer:
         
         sentiment_score = abs(analysis['sentiment_scores']['compound'])
         subjectivity_score = analysis['subjectivity_score']
-        emotional_score = len(analysis['emotional_language']) / 10  # Normalize
+        emotional_score = len(analysis['emotional_language']) / 10  
         indicators_score = sum(len(v) for v in analysis['bias_indicators'].values()) / 10
         
         overall_score = (
@@ -265,4 +244,4 @@ class BiasAnalyzer:
             min(indicators_score, 1.0) * indicators_weight
         )
         
-        return min(overall_score * 5, 5.0)  # Scale to 0-5
+        return min(overall_score * 5, 5.0)

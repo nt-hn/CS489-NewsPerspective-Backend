@@ -1,12 +1,11 @@
-FROM python:3.9.18-slim
-
-WORKDIR /app
+FROM python:3.11.10-slim
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN python -m nltk.downloader vader_lexicon punkt
+RUN python -m nltk.downloader vader_lexicon stopwords punkt
 RUN python -m spacy download en_core_web_sm
 
+COPY .env .env
 COPY . .
 
 ENV PORT=8000 \
