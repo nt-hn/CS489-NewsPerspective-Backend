@@ -5,7 +5,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN python -m nltk.downloader vader_lexicon stopwords punkt
 RUN python -m spacy download en_core_web_sm
 
-COPY .env .env
 COPY . .
 
 ENV PORT=8000 \
