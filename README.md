@@ -14,7 +14,7 @@ Analyzes the given article text and returns insights like sentiment, bias, emoti
 ```
 
 **Response:**
-```json
+```typescript
 {
   status: 'success' | 'error';
   analysis: {
