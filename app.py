@@ -3,7 +3,7 @@ from flask_cors import CORS
 from config import Config
 from models.article_analyzer import ArticleAnalyzer
 from get_content_using_url import get_page_text
-from GPT import compare_articles
+from GPT import GPTCompareArticles
 import nltk
 import os
 import ssl
@@ -26,6 +26,7 @@ nltk.download('vader_lexicon', quiet=True)
 nltk.download('punkt', quiet=True)
 
 analyzer = ArticleAnalyzer(Config.NEWS_API_KEY)
+gpt = GPTCompareArticles(Config.OPENAI_API_KEY)
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze_article():
@@ -55,7 +56,7 @@ def analyze_article():
         
         if len(related_articles) > 0:
             content = get_page_text(related_articles[0]['url'])
-            comparision_result = compare_articles(article_text, content)
+            comparision_result = gpt.compare_articles(article_text, content)
             response['GPT_Compare'] = comparision_result       
              
         return jsonify(response)

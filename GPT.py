@@ -1,36 +1,39 @@
-import os
 from dotenv import load_dotenv
 from openai import OpenAI
+import requests
 
-load_dotenv()
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-client = OpenAI(api_key=OPENAI_API_KEY)
+class GPTCompareArticles:
+    def __init__(self, OPENAI_API_KEY):
+        self.client = OpenAI(api_key=OPENAI_API_KEY)
 
-def compare_articles(article_1: str, article_2: str) -> str:
-    model = "gpt-4o-mini"
-    conversation_history = [
-        {"role": "system", "content": "You are a helpful assistant."}
-    ]
-    
-    prompt_article_one = f"You are News Perspective a company that looks for articles online and compare their factual analysis. Your task is to compare the facts of two articles the articles the user is currently reading and other articles in the market. Output summary of your analysis, instead of first article use the term current article and instead of second article use the term other articles. Keep your response as concise as possible. I will give you what other articles are saying in the next prompt but here is the article the user is currently reading: `{article_1}`"
-    conversation_history.append({"role": "user", "content": prompt_article_one})
-    response = client.chat.completions.create(
-        model=model,
-        messages=conversation_history
-    )
-    output = response.choices[0].message.content.strip()
+    def compare_articles(self, article_1: str, article_2: str) -> str:
+        try:
+            model = "gpt-4o-mini"
+            conversation_history = [
+                {"role": "system", "content": "You are a helpful assistant."}
+            ]
+            
+            prompt_article_one = f"You are News Perspective a company that looks for articles online and compare their factual analysis. Your task is to compare the facts of two articles the articles the user is currently reading and other articles in the market. Output summary of your analysis, instead of first article use the term current article and instead of second article use the term other articles. Keep your response as concise as possible. I will give you what other articles are saying in the next prompt but here is the article the user is currently reading: `{article_1}`"
+            conversation_history.append({"role": "user", "content": prompt_article_one})
+            response = self.client.chat.completions.create(
+                model=model,
+                messages=conversation_history
+            )
+            output = response.choices[0].message.content.strip()
 
-    conversation_history.append({"role": "assistant", "content": output})
-    
-    prompt_article_two = f"Here is what other articles are saying {article_2}"
-    conversation_history.append({"role": "user", "content": prompt_article_two})
-    response = client.chat.completions.create(
-        model=model,
-        messages=conversation_history
-    )
-    result = response.choices[0].message.content.strip()
+            conversation_history.append({"role": "assistant", "content": output})
+            
+            prompt_article_two = f"Here is what other articles are saying {article_2}"
+            conversation_history.append({"role": "user", "content": prompt_article_two})
+            response = self.client.chat.completions.create(
+                model=model,
+                messages=conversation_history
+            )
+            result = response.choices[0].message.content.strip()
 
-    return result
+            return result
+        except requests.exceptions.RequestException as e:
+            return f"An error occurred: {e}"
 
 if __name__ == '__main__':
     article_1 = """
@@ -51,6 +54,3 @@ Economic Risks: A rapid transition to green energy could cause economic disrupti
 Technological Optimism: Rather than government mandates, market-driven innovation and technological advancements can provide solutions to environmental challenges without the need for heavy regulation.
 Skepticism About Science: While climate change is real, critics argue that the data isn't conclusive enough to justify the immediate and extreme measures proposed. Some question the reliability of climate models and argue that the focus should be on adaptation rather than drastic prevention.
     """
-    comparision_result = compare_articles(article_1, article_2)
-    print(comparision_result)
-    print('Done!')
