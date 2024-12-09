@@ -16,6 +16,7 @@ Analyzes the given article text and returns insights like sentiment, bias, emoti
 **Response:**
 ```typescript
 {
+  GPT_Compare: string, //GPTs summary of the difference between the current article and related articles
   status: 'success' | 'error';
   analysis: {
     bias_indicators: {

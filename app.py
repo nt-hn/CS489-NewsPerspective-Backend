@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from config import Config
 from models.article_analyzer import ArticleAnalyzer
+from get_content_using_url import get_page_text
+from GPT import compare_articles
 import nltk
 import os
 import ssl
@@ -47,9 +49,15 @@ def analyze_article():
             'analysis': analysis['bias_analysis'],
             'keywords': analysis['keywords'],  
             'political_analysis': analysis['political_analysis'],
-            'related_articles': related_articles
+            'related_articles': related_articles,
+            'GPT_Compare': ''
         }
         
+        if len(related_articles) > 0:
+            content = get_page_text(related_articles[0]['url'])
+            comparision_result = compare_articles(article_text, content)
+            response['GPT_Compare'] = comparision_result       
+             
         return jsonify(response)
         
     except Exception as e:
