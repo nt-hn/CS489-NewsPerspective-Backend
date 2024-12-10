@@ -1,8 +1,8 @@
 FROM python:3.11.10-slim
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN python -m nltk.downloader vader_lexicon stopwords punkt
+RUN pip install -r requirements.txt
+RUN python -m nltk.downloader vader_lexicon stopwords punkt_tab
 RUN python -m spacy download en_core_web_sm
 
 COPY . .

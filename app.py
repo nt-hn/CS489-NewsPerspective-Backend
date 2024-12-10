@@ -22,8 +22,9 @@ except AttributeError:
 else:
     ssl._create_default_https_context = _create_unverified_https_context
 
+nltk.download('punkt_tab', quiet=True)
 nltk.download('vader_lexicon', quiet=True)
-nltk.download('punkt', quiet=True)
+nltk.download('stopwords', quiet=True)
 
 analyzer = ArticleAnalyzer(Config.NEWS_API_KEY)
 gpt = GPTCompareArticles(Config.OPENAI_API_KEY)
